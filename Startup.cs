@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Swagger;
+using System.Reflection;
 
 namespace WebApi
 {
@@ -27,7 +29,13 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
-            services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDb"));
+
+
+            //services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDb"));
+
+            services.AddDbContext<DataContext>(options =>
+                options.UseSqlite("Data Source=identity.db"));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddAutoMapper();
 
@@ -73,6 +81,11 @@ namespace WebApi
 
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,6 +100,22 @@ namespace WebApi
             app.UseAuthentication();
 
             app.UseMvc();
+
+            app.UseSwagger();
+
+            app.UseSwagger(c =>
+            {
+                c.RouteTemplate  = "/swagger/v1/swagger.json";
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                // string[] names = GetType().GetTypeInfo().Assembly.GetManifestResourceNames();
+
+                c.SwaggerEndpoint("/docs/api/v1/swagger.json", "Config Manager API v1");
+                c.RoutePrefix = "docs/api";
+                c.IndexStream = () => GetType().GetTypeInfo().Assembly.GetManifestResourceStream("config-manager.Resources.swagger.index.html");
+            });
         }
     }
 }
