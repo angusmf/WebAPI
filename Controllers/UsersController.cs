@@ -11,7 +11,9 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Services;
 using WebApi.Dtos;
-using WebApi.Entities;
+using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace WebApi.Controllers
 {
@@ -20,28 +22,42 @@ namespace WebApi.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
-        private IUserService _userService;
         private IMapper _mapper;
         private readonly AppSettings _appSettings;
+        private UserManager<IdentityUser> _userManager;
+        private readonly DataContext _context;
 
         public UsersController(
-            IUserService userService,
             IMapper mapper,
-            IOptions<AppSettings> appSettings)
+            IOptions<AppSettings> appSettings,
+            UserManager<IdentityUser> userManager,
+            DataContext context)
         {
-            _userService = userService;
             _mapper = mapper;
             _appSettings = appSettings.Value;
+            _userManager = userManager;
+            _context = context;
         }
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public IActionResult Authenticate([FromBody]UserDto userDto)
+        public async Task<IActionResult> AuthenticateAsync([FromBody]UserDto userDto)
         {
-            var user = _userService.Authenticate(userDto.Username, userDto.Password);
+            if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password))
+                return null;
 
-            if (user == null)
+            var user = _context.Users.Where(u => u.UserName == userDto.Username).SingleOrDefault();
+
+            var passwordValidator = new PasswordValidator<IdentityUser>();
+            var result = await passwordValidator.ValidateAsync(_userManager, user, userDto.Password);
+
+            if (!result.Succeeded)
+            {
+                //invalid login
                 return BadRequest(new { message = "Username or password is incorrect" });
+            }
+          
+
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
@@ -60,9 +76,7 @@ namespace WebApi.Controllers
             // return basic user info (without password) and token to store client side
             return Ok(new {
                 Id = user.Id,
-                Username = user.Username,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                Username = user.UserName,
                 Token = tokenString
             });
         }
@@ -72,12 +86,13 @@ namespace WebApi.Controllers
         public IActionResult Register([FromBody]UserDto userDto)
         {
             // map dto to entity
-            var user = _mapper.Map<User>(userDto);
+            var user = _mapper.Map<IdentityUser>(userDto);
 
             try 
             {
                 // save 
-                _userService.Create(user, userDto.Password);
+                _userManager.CreateAsync(user);
+                _context.SaveChanges();
                 return Ok();
             } 
             catch(AppException ex)
@@ -90,7 +105,7 @@ namespace WebApi.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var users =  _userService.GetAll();
+            var users = _context.Users;
             var userDtos = _mapper.Map<IList<UserDto>>(users);
             return Ok(userDtos);
         }
@@ -98,7 +113,7 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var user =  _userService.GetById(id);
+            var user = _context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault();
             var userDto = _mapper.Map<UserDto>(user);
             return Ok(userDto);
         }
@@ -107,13 +122,14 @@ namespace WebApi.Controllers
         public IActionResult Update(int id, [FromBody]UserDto userDto)
         {
             // map dto to entity and set id
-            var user = _mapper.Map<User>(userDto);
-            user.Id = id;
+            var user = _mapper.Map<IdentityUser>(userDto);
+            user.Id = id.ToString();
 
             try 
             {
                 // save 
-                _userService.Update(user, userDto.Password);
+                _context.Update(_context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault());
+                _context.SaveChanges();
                 return Ok();
             } 
             catch(AppException ex)
@@ -126,7 +142,9 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _userService.Delete(id);
+            var user = _context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault();
+            _userManager.DeleteAsync(user);
+            _context.SaveChanges();
             return Ok();
         }
     }

@@ -1,6 +1,6 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using WebApi.Dtos;
-using WebApi.Entities;
 
 namespace WebApi.Helpers
 {
@@ -8,8 +8,8 @@ namespace WebApi.Helpers
     {
         public AutoMapperProfile()
         {
-            CreateMap<User, UserDto>();
-            CreateMap<UserDto, User>();
+            CreateMap<IdentityUser, UserDto>();
+            CreateMap<UserDto, IdentityUser>();
         }
     }
 }

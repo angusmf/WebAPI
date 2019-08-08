@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Swagger;
 using System.Reflection;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApi
 {
@@ -38,6 +39,9 @@ namespace WebApi
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddAutoMapper();
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddRoles<IdentityRole>() 
+                .AddEntityFrameworkStores<DataContext>();
 
             // configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("AppSettings");
@@ -57,9 +61,10 @@ namespace WebApi
                 {
                     OnTokenValidated = context =>
                     {
-                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                        var userService = context.HttpContext.RequestServices.GetRequiredService<UserService>();
                         var userId = int.Parse(context.Principal.Identity.Name);
                         var user = userService.GetById(userId);
+                        
                         if (user == null)
                         {
                             // return unauthorized if user no longer exists
@@ -80,7 +85,7 @@ namespace WebApi
             });
 
             // configure DI for application services
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<UserService>();
 
             services.AddSwaggerGen(c =>
             {
@@ -98,6 +103,7 @@ namespace WebApi
                 .AllowAnyHeader());
 
             app.UseAuthentication();
+
 
             app.UseMvc();
 
