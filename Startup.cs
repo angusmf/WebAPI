@@ -31,9 +31,6 @@ namespace WebApi
         {
             services.AddCors();
 
-
-            //services.AddDbContext<DataContext>(x => x.UseInMemoryDatabase("TestDb"));
-
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlite("Data Source=identity.db"));
 

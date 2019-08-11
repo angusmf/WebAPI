@@ -147,5 +147,12 @@ namespace WebApi.Controllers
             _context.SaveChanges();
             return Ok();
         }
+
+        [HttpGet("id")]
+        public IActionResult GetId()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.Name);
+            return Ok(userId);
+        }
     }
 }
