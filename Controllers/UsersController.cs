@@ -56,17 +56,21 @@ namespace WebApi.Controllers
                 //invalid login
                 return BadRequest(new { message = "Username or password is incorrect" });
             }
-          
 
 
+            List<Claim> claims = new List<Claim>();
+            claims.Add(new Claim(ClaimTypes.Name, user.Id));
+            
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+            var roles = await _userManager.GetRolesAsync(user);
+            foreach (string role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[] 
-                {
-                    new Claim(ClaimTypes.Name, user.Id.ToString())
-                }),
+                Subject = new ClaimsIdentity(claims.ToArray()),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -74,7 +78,8 @@ namespace WebApi.Controllers
             var tokenString = tokenHandler.WriteToken(token);
 
             // return basic user info (without password) and token to store client side
-            return Ok(new {
+            return Ok(new
+            {
                 Id = user.Id,
                 Username = user.UserName,
                 Token = tokenString
@@ -83,7 +88,7 @@ namespace WebApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register([FromBody]UserDto userDto)
+        public async Task<IActionResult> Register([FromBody]UserDto userDto)
         {
             // map dto to entity
             var user = _mapper.Map<IdentityUser>(userDto);
@@ -91,7 +96,11 @@ namespace WebApi.Controllers
             try 
             {
                 // save 
-                _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user);
+                if (result.Succeeded)
+                {
+                    await _userManager.AddToRoleAsync(user, "Player");
+                }
                 _context.SaveChanges();
                 return Ok();
             } 
@@ -102,6 +111,7 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -110,25 +120,27 @@ namespace WebApi.Controllers
             return Ok(userDtos);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        public IActionResult GetById(string id)
         {
-            var user = _context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault();
+            var user = _context.Users.Where(u => u.Id == id).SingleOrDefault();
             var userDto = _mapper.Map<UserDto>(user);
             return Ok(userDto);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody]UserDto userDto)
+        public IActionResult Update(string id, [FromBody]UserDto userDto)
         {
             // map dto to entity and set id
             var user = _mapper.Map<IdentityUser>(userDto);
-            user.Id = id.ToString();
+            user.Id = id;
 
             try 
             {
                 // save 
-                _context.Update(_context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault());
+                _context.Update(_context.Users.Where(u => u.Id == id).SingleOrDefault());
                 _context.SaveChanges();
                 return Ok();
             } 
@@ -139,10 +151,11 @@ namespace WebApi.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
-            var user = _context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault();
+            var user = _context.Users.Where(u => u.Id == id).SingleOrDefault();
             _userManager.DeleteAsync(user);
             _context.SaveChanges();
             return Ok();
@@ -152,6 +165,8 @@ namespace WebApi.Controllers
         public IActionResult GetId()
         {
             var userId = User.FindFirstValue(ClaimTypes.Name);
+            var user = _userManager.FindByIdAsync(userId);
+            var role = _userManager.GetRolesAsync(user.Result);
             return Ok(userId);
         }
     }

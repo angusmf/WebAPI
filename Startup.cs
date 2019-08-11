@@ -59,8 +59,7 @@ namespace WebApi
                     OnTokenValidated = context =>
                     {
                         var userService = context.HttpContext.RequestServices.GetRequiredService<UserService>();
-                        var userId = int.Parse(context.Principal.Identity.Name);
-                        var user = userService.GetById(userId);
+                        var user = userService.GetById(context.Principal.Identity.Name);
                         
                         if (user == null)
                         {
@@ -100,7 +99,6 @@ namespace WebApi
                 .AllowAnyHeader());
 
             app.UseAuthentication();
-
 
             app.UseMvc();
 

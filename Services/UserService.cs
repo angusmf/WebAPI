@@ -19,15 +19,9 @@ namespace WebApi.Services
             _context = context;
         }
 
-    
-
-        public IdentityUser GetById(int id)
+        public IdentityUser GetById(string id)
         {
-            return _context.Users.Where(u => u.Id == id.ToString()).SingleOrDefault();
+            return _context.Users.Where(u => u.Id == id).SingleOrDefault();
         }
-
-       
-
-        
     }
 }
