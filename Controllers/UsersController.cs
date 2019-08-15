@@ -120,7 +120,7 @@ namespace WebApi.Controllers
             return Ok(userDtos);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpGet("{id}")]
         public IActionResult GetById(string id)
         {
@@ -129,7 +129,7 @@ namespace WebApi.Controllers
             return Ok(userDto);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
         public IActionResult Update(string id, [FromBody]UserDto userDto)
         {
@@ -151,7 +151,7 @@ namespace WebApi.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpDelete("{id}")]
         public IActionResult Delete(string id)
         {
@@ -161,6 +161,7 @@ namespace WebApi.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin,Player", AuthenticationSchemes = "Bearer")]
         [HttpGet("id")]
         public IActionResult GetId()
         {
