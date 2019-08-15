@@ -35,7 +35,13 @@ namespace WebApi
                 options.UseSqlite("Data Source=identity.db"));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            services.AddAutoMapper();
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new AutoMapperProfile());
+            });
+
+            IMapper mapper = mappingConfig.CreateMapper();
+            services.AddSingleton(mapper);
             services.AddDefaultIdentity<IdentityUser>()
                 .AddRoles<IdentityRole>() 
                 .AddEntityFrameworkStores<DataContext>();
