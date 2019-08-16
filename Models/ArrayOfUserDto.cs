@@ -24,14 +24,8 @@ namespace WebApi.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class UserView : IEquatable<UserView>
+    public partial class ArrayOfUserDto : List<UserDto>, IEquatable<ArrayOfUserDto>
     { 
-        /// <summary>
-        /// Gets or Sets TokenId
-        /// </summary>
-        [DataMember(Name="tokenId")]
-        public string TokenId { get; set; }
-
         /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
@@ -39,8 +33,7 @@ namespace WebApi.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class UserView {\n");
-            sb.Append("  TokenId: ").Append(TokenId).Append("\n");
+            sb.Append("class ArrayOfUserDto {\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -49,7 +42,7 @@ namespace WebApi.Models
         /// Returns the JSON string presentation of the object
         /// </summary>
         /// <returns>JSON string presentation of the object</returns>
-        public string ToJson()
+        public  new string ToJson()
         {
             return JsonConvert.SerializeObject(this, Formatting.Indented);
         }
@@ -63,25 +56,20 @@ namespace WebApi.Models
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((UserView)obj);
+            return obj.GetType() == GetType() && Equals((ArrayOfUserDto)obj);
         }
 
         /// <summary>
-        /// Returns true if UserView instances are equal
+        /// Returns true if ArrayOfUserDto instances are equal
         /// </summary>
-        /// <param name="other">Instance of UserView to be compared</param>
+        /// <param name="other">Instance of ArrayOfUserDto to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UserView other)
+        public bool Equals(ArrayOfUserDto other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
-            return 
-                (
-                    TokenId == other.TokenId ||
-                    TokenId != null &&
-                    TokenId.Equals(other.TokenId)
-                );
+            return false;
         }
 
         /// <summary>
@@ -94,8 +82,6 @@ namespace WebApi.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    if (TokenId != null)
-                    hashCode = hashCode * 59 + TokenId.GetHashCode();
                 return hashCode;
             }
         }
@@ -103,12 +89,12 @@ namespace WebApi.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(UserView left, UserView right)
+        public static bool operator ==(ArrayOfUserDto left, ArrayOfUserDto right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(UserView left, UserView right)
+        public static bool operator !=(ArrayOfUserDto left, ArrayOfUserDto right)
         {
             return !Equals(left, right);
         }

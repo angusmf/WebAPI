@@ -42,7 +42,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var payload = GoogleJsonWebSignature.ValidateAsync(userView.tokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
+                var payload = GoogleJsonWebSignature.ValidateAsync(userView.TokenId, new GoogleJsonWebSignature.ValidationSettings()).Result;
 
                 if (payload == null || payload.Email == null)
                 {
@@ -90,11 +90,7 @@ namespace WebApi.Controllers
                 var tokenString = tokenHandler.WriteToken(token);
 
                 // return basic user info (without password) and token to store client side
-                return Ok(new
-                {
-                    user.Id,
-                    Token = tokenString
-                });
+                return Ok(new AuthToken() { Token = tokenString });
 
 
             }

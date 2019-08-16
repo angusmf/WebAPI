@@ -24,13 +24,13 @@ namespace WebApi.Models
     /// 
     /// </summary>
     [DataContract]
-    public partial class UserView : IEquatable<UserView>
+    public partial class AuthToken : IEquatable<AuthToken>
     { 
         /// <summary>
-        /// Gets or Sets TokenId
+        /// Gets or Sets Token
         /// </summary>
-        [DataMember(Name="tokenId")]
-        public string TokenId { get; set; }
+        [DataMember(Name="token")]
+        public string Token { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -39,8 +39,8 @@ namespace WebApi.Models
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class UserView {\n");
-            sb.Append("  TokenId: ").Append(TokenId).Append("\n");
+            sb.Append("class AuthToken {\n");
+            sb.Append("  Token: ").Append(Token).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -63,24 +63,24 @@ namespace WebApi.Models
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj.GetType() == GetType() && Equals((UserView)obj);
+            return obj.GetType() == GetType() && Equals((AuthToken)obj);
         }
 
         /// <summary>
-        /// Returns true if UserView instances are equal
+        /// Returns true if AuthToken instances are equal
         /// </summary>
-        /// <param name="other">Instance of UserView to be compared</param>
+        /// <param name="other">Instance of AuthToken to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals(UserView other)
+        public bool Equals(AuthToken other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return 
                 (
-                    TokenId == other.TokenId ||
-                    TokenId != null &&
-                    TokenId.Equals(other.TokenId)
+                    Token == other.Token ||
+                    Token != null &&
+                    Token.Equals(other.Token)
                 );
         }
 
@@ -94,8 +94,8 @@ namespace WebApi.Models
             {
                 var hashCode = 41;
                 // Suitable nullity checks etc, of course :)
-                    if (TokenId != null)
-                    hashCode = hashCode * 59 + TokenId.GetHashCode();
+                    if (Token != null)
+                    hashCode = hashCode * 59 + Token.GetHashCode();
                 return hashCode;
             }
         }
@@ -103,12 +103,12 @@ namespace WebApi.Models
         #region Operators
         #pragma warning disable 1591
 
-        public static bool operator ==(UserView left, UserView right)
+        public static bool operator ==(AuthToken left, AuthToken right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(UserView left, UserView right)
+        public static bool operator !=(AuthToken left, AuthToken right)
         {
             return !Equals(left, right);
         }

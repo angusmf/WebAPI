@@ -39,76 +39,76 @@ namespace WebApi.Controllers
             _context = context;
         }
 
-        [AllowAnonymous]
-        [HttpPost("authenticate")]
-        public async Task<IActionResult> AuthenticateAsync([FromBody]UserDto userDto)
-        {
-            if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password))
-                return null;
+        //[AllowAnonymous]
+        //[HttpPost("authenticate")]
+        //public async Task<IActionResult> AuthenticateAsync([FromBody]UserDto userDto)
+        //{
+        //    if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password))
+        //        return null;
 
-            var user = _context.Users.Where(u => u.UserName == userDto.Username).SingleOrDefault();
+        //    var user = _context.Users.Where(u => u.UserName == userDto.Username).SingleOrDefault();
 
-            var passwordValidator = new PasswordValidator<IdentityUser>();
-            var result = await passwordValidator.ValidateAsync(_userManager, user, userDto.Password);
+        //    var passwordValidator = new PasswordValidator<IdentityUser>();
+        //    var result = await passwordValidator.ValidateAsync(_userManager, user, userDto.Password);
 
-            if (!result.Succeeded)
-            {
-                //invalid login
-                return BadRequest(new { message = "Username or password is incorrect" });
-            }
+        //    if (!result.Succeeded)
+        //    {
+        //        //invalid login
+        //        return BadRequest(new { message = "Username or password is incorrect" });
+        //    }
 
 
-            List<Claim> claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.Name, user.Id));
+        //    List<Claim> claims = new List<Claim>();
+        //    claims.Add(new Claim(ClaimTypes.Name, user.Id));
             
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var roles = await _userManager.GetRolesAsync(user);
-            foreach (string role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims.ToArray()),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
+        //    var roles = await _userManager.GetRolesAsync(user);
+        //    foreach (string role in roles)
+        //    {
+        //        claims.Add(new Claim(ClaimTypes.Role, role));
+        //    }
+        //    var tokenDescriptor = new SecurityTokenDescriptor
+        //    {
+        //        Subject = new ClaimsIdentity(claims.ToArray()),
+        //        Expires = DateTime.UtcNow.AddDays(7),
+        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        //    };
+        //    var token = tokenHandler.CreateToken(tokenDescriptor);
+        //    var tokenString = tokenHandler.WriteToken(token);
 
-            // return basic user info (without password) and token to store client side
-            return Ok(new
-            {
-                user.Id,
-                Token = tokenString
-            });
-        }
+        //    // return basic user info (without password) and token to store client side
+        //    return Ok(new
+        //    {
+        //        user.Id,
+        //        Token = tokenString
+        //    });
+        //}
 
-        [AllowAnonymous]
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody]UserDto userDto)
-        {
-            // map dto to entity
-            var user = _mapper.Map<IdentityUser>(userDto);
+        //[AllowAnonymous]
+        //[HttpPost("register")]
+        //public async Task<IActionResult> Register([FromBody]UserDto userDto)
+        //{
+        //    // map dto to entity
+        //    var user = _mapper.Map<IdentityUser>(userDto);
 
-        try 
-        {
-            // save 
-            var result = await _userManager.CreateAsync(user);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Player");
-            }
-            _context.SaveChanges();
-            return Ok();
-        } 
-        catch(AppException ex)
-        {
-            // return error message if there was an exception
-            return BadRequest(new { message = ex.Message });
-        }
-        }
+        //try 
+        //{
+        //    // save 
+        //    var result = await _userManager.CreateAsync(user);
+        //    if (result.Succeeded)
+        //    {
+        //        await _userManager.AddToRoleAsync(user, "Player");
+        //    }
+        //    _context.SaveChanges();
+        //    return Ok();
+        //} 
+        //catch(AppException ex)
+        //{
+        //    // return error message if there was an exception
+        //    return BadRequest(new { message = ex.Message });
+        //}
+        //}
 
         [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -119,14 +119,7 @@ namespace WebApi.Controllers
             return Ok(userDtos);
         }
 
-        [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
-        [HttpGet("{id}")]
-        public IActionResult GetById(string id)
-        {
-            var user = _context.Users.Where(u => u.Id == id).SingleOrDefault();
-            var userDto = _mapper.Map<UserDto>(user);
-            return Ok(userDto);
-        }
+
 
         [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpPut("{id}")]
@@ -162,12 +155,12 @@ namespace WebApi.Controllers
 
         [Authorize(Roles = "Admin,Player", AuthenticationSchemes = "Bearer")]
         [HttpGet("id")]
-        public IActionResult GetId()
+        public async Task<IActionResult> GetId()
         {
             var userId = User.FindFirstValue(ClaimTypes.Name);
-            var user = _userManager.FindByIdAsync(userId);
-            var role = _userManager.GetRolesAsync(user.Result);
-            return Ok(userId);
+            var user = await _userManager.FindByIdAsync(userId);
+            var userDto = _mapper.Map<UserDto>(user);
+            return Ok(userDto);
         }
     }
 }

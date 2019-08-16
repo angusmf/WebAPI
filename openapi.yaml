@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: My API
+  version: v1-oas3
+servers:
+- url: /
+paths:
+  /Auth/google:
+    post:
+      tags:
+      - Auth
+      operationId: Google
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              $ref: '#/components/schemas/UserView'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserView'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/UserView'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/UserView'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+  /Users:
+    get:
+      tags:
+      - Users
+      operationId: GetAll
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayOfUserDto'
+  /Users/{id}:
+    delete:
+      tags:
+      - Users
+      operationId: Delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        200:
+          description: Success
+  /Users/id:
+    get:
+      tags:
+      - Users
+      operationId: GetId
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+components:
+  schemas:
+    UserView:
+      type: object
+      properties:
+        tokenId:
+          type: string
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+    AuthToken:
+      type: object
+      properties:
+        token:
+          type: string
+    ArrayOfUserDto:
+      type: array
+      items:
+        $ref: '#/components/schemas/UserDto'
+  requestBodies:
+    UserDto:
+      content:
+        application/json-patch+json:
+          schema:
+            $ref: '#/components/schemas/UserDto'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserDto'
+        text/json:
+          schema:
+            $ref: '#/components/schemas/UserDto'
+        application/*+json:
+          schema:
+            $ref: '#/components/schemas/UserDto'
