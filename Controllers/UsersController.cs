@@ -80,8 +80,7 @@ namespace WebApi.Controllers
             // return basic user info (without password) and token to store client side
             return Ok(new
             {
-                Id = user.Id,
-                Username = user.UserName,
+                user.Id,
                 Token = tokenString
             });
         }
@@ -93,22 +92,22 @@ namespace WebApi.Controllers
             // map dto to entity
             var user = _mapper.Map<IdentityUser>(userDto);
 
-            try 
+        try 
+        {
+            // save 
+            var result = await _userManager.CreateAsync(user);
+            if (result.Succeeded)
             {
-                // save 
-                var result = await _userManager.CreateAsync(user);
-                if (result.Succeeded)
-                {
-                    await _userManager.AddToRoleAsync(user, "Player");
-                }
-                _context.SaveChanges();
-                return Ok();
-            } 
-            catch(AppException ex)
-            {
-                // return error message if there was an exception
-                return BadRequest(new { message = ex.Message });
+                await _userManager.AddToRoleAsync(user, "Player");
             }
+            _context.SaveChanges();
+            return Ok();
+        } 
+        catch(AppException ex)
+        {
+            // return error message if there was an exception
+            return BadRequest(new { message = ex.Message });
+        }
         }
 
         [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
