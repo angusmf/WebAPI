@@ -49,7 +49,7 @@ namespace WebApi.Controllers
                     return BadRequest(new { message = "Validation failed" });
                 }
 
-                var user = _context.Users.Where(u => u.Email == payload.Email).SingleOrDefault();
+                var user = _context.Users.Where(u => u.UserName == payload.Email).SingleOrDefault();
 
                 //if user not found, register them
                 if (user == null)
@@ -104,7 +104,7 @@ namespace WebApi.Controllers
         async Task<IdentityUser> Register(GoogleJsonWebSignature.Payload payload)
         {
 
-            var user = new IdentityUser() { Email = payload.Email };
+            var user = new IdentityUser() { UserName = payload.Email };
 
             // save 
             var result = await _userManager.CreateAsync(user);

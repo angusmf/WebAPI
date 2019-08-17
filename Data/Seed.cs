@@ -30,8 +30,7 @@ namespace WebApplication.Data
             // creating a super user who could maintain the web app
             var poweruser = new IdentityUser
             {
-                UserName = Configuration.GetSection("AppSettings")["UserEmail"],
-                Email = Configuration.GetSection("AppSettings")["UserEmail"]
+                UserName = Configuration.GetSection("AppSettings")["UserEmail"]
             };
             
             string userPassword = Configuration.GetSection("AppSettings")["UserPassword"];

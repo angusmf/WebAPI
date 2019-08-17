@@ -39,76 +39,7 @@ namespace WebApi.Controllers
             _context = context;
         }
 
-        //[AllowAnonymous]
-        //[HttpPost("authenticate")]
-        //public async Task<IActionResult> AuthenticateAsync([FromBody]UserDto userDto)
-        //{
-        //    if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password))
-        //        return null;
-
-        //    var user = _context.Users.Where(u => u.UserName == userDto.Username).SingleOrDefault();
-
-        //    var passwordValidator = new PasswordValidator<IdentityUser>();
-        //    var result = await passwordValidator.ValidateAsync(_userManager, user, userDto.Password);
-
-        //    if (!result.Succeeded)
-        //    {
-        //        //invalid login
-        //        return BadRequest(new { message = "Username or password is incorrect" });
-        //    }
-
-
-        //    List<Claim> claims = new List<Claim>();
-        //    claims.Add(new Claim(ClaimTypes.Name, user.Id));
-            
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-        //    var roles = await _userManager.GetRolesAsync(user);
-        //    foreach (string role in roles)
-        //    {
-        //        claims.Add(new Claim(ClaimTypes.Role, role));
-        //    }
-        //    var tokenDescriptor = new SecurityTokenDescriptor
-        //    {
-        //        Subject = new ClaimsIdentity(claims.ToArray()),
-        //        Expires = DateTime.UtcNow.AddDays(7),
-        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        //    };
-        //    var token = tokenHandler.CreateToken(tokenDescriptor);
-        //    var tokenString = tokenHandler.WriteToken(token);
-
-        //    // return basic user info (without password) and token to store client side
-        //    return Ok(new
-        //    {
-        //        user.Id,
-        //        Token = tokenString
-        //    });
-        //}
-
-        //[AllowAnonymous]
-        //[HttpPost("register")]
-        //public async Task<IActionResult> Register([FromBody]UserDto userDto)
-        //{
-        //    // map dto to entity
-        //    var user = _mapper.Map<IdentityUser>(userDto);
-
-        //try 
-        //{
-        //    // save 
-        //    var result = await _userManager.CreateAsync(user);
-        //    if (result.Succeeded)
-        //    {
-        //        await _userManager.AddToRoleAsync(user, "Player");
-        //    }
-        //    _context.SaveChanges();
-        //    return Ok();
-        //} 
-        //catch(AppException ex)
-        //{
-        //    // return error message if there was an exception
-        //    return BadRequest(new { message = ex.Message });
-        //}
-        //}
+    
 
         [Authorize(Roles = "Admin", AuthenticationSchemes = "Bearer")]
         [HttpGet]
@@ -153,7 +84,7 @@ namespace WebApi.Controllers
             return Ok();
         }
 
-        [Authorize(Roles = "Admin,Player", AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = "Player,Admin", AuthenticationSchemes = "Bearer")]
         [HttpGet("id")]
         public async Task<IActionResult> GetId()
         {
