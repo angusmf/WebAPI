@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using AutoMapper;
 using System.IdentityModel.Tokens.Jwt;
 using WebApi.Helpers;
 using Microsoft.Extensions.Options;
