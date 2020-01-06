@@ -29,6 +29,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors();
+            services.AddControllers();
 
             services.AddDbContext<DataContext>(options =>
                 options.UseSqlite("Data Source=identity.db"));
@@ -124,6 +125,11 @@ namespace WebApi
                 c.SwaggerEndpoint("/docs/api/v1/swagger.json", "Config Manager API v1");
                 c.RoutePrefix = "docs/api";
                 c.IndexStream = () => GetType().GetTypeInfo().Assembly.GetManifestResourceStream("config-manager.Resources.swagger.index.html");
+            });
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
             });
         }
     }
